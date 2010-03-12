@@ -4,6 +4,8 @@
 class Fiber
 {
 public:
+    typedef void(*StartFunction)();
+
     enum Status
     {
         NotStarted,
@@ -13,36 +15,29 @@ public:
     };
 
 public:
-    explicit Fiber(int stackSize = 32768);
-    virtual ~Fiber();
+    explicit Fiber(StartFunction startFunction, int stackSize = 32768);
+    ~Fiber();
     
     bool cont();
     static void yield();
     
-    static Fiber *currentFiber();
-    
     Status status()
     { return _status; }
-    
-protected:
-    // could be abstract if subclassing for start fiber
-    virtual void run() {}
-    
+
+    static Fiber *currentFiber();
+
 private:
     // for the original fiber
-    Fiber(bool);
+    Fiber();
 
     static void yieldHelper(Status stopStatus);
-    
+    static void entryPoint();
+
+    StartFunction _startFunction;
     void *_stackData;
     void *_stackPointer;
     Fiber *_previousFiber;
     Status _status;
-    
-    // should be thread local
-    static Fiber *_currentFiber;
-    
-    static void entryPoint();
 };
 
 #endif // INCLUDE_FIBER_H

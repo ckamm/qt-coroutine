@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <QtCore/QtGlobal>
+#include <QtCore/QThreadStorage>
 
 #include "fiber.h"
 
@@ -10,23 +11,21 @@
   Fibers, also known as coroutines, allow managing multiple stacks in the same
   thread.
 
+  \omit ### outdated \endomit
   To create a fiber, subclass Fiber and override the run() method. To run it,
   call cont(). This will execute the code in run() until it calls Fiber::yield().
   At that point, the call to cont() returns. Subsequent calls to cont() will
   continue execution of the fiber just after the yield().
 
   Example:
-  class MyFiber : public Fiber
+  void myFiber()
   {
-      virtual void run()
-      {
-          qDebug() << "1";
-          Fiber::yield();
-          qDebug() << "2";
-      }
+      qDebug() << "1";
+      Fiber::yield();
+      qDebug() << "2";
   }
 
-  MyFiber fib;
+  MyFiber fib(&myFiber);
   qDebug() << "0.5";
   fib.cont(); // prints 1
   qDebug() << "1.5";
@@ -43,10 +42,9 @@ void initializeStack(void *data, int size, void (*entry)(), void **stackPointer)
 void switchStack(void* to, void** from) { _switchStackInternal(to, from); }
 #endif
 
-Fiber *Fiber::_currentFiber = 0;
-
-Fiber::Fiber(int stackSize)
-    : _stackData(0)
+Fiber::Fiber(StartFunction startFunction, int stackSize)
+    : _startFunction(startFunction)
+    , _stackData(0)
     , _stackPointer(0)
     , _previousFiber(0)
     , _status(NotStarted)
@@ -58,8 +56,9 @@ Fiber::Fiber(int stackSize)
     initializeStack(_stackData, stackSize, &entryPoint, &_stackPointer);
 }
 
-Fiber::Fiber(bool)
-    : _stackData(0)
+Fiber::Fiber()
+    : _startFunction(0)
+    , _stackData(0)
     , _stackPointer(0)
     , _previousFiber(0)
     , _status(Running)
@@ -72,18 +71,23 @@ Fiber::~Fiber()
         free(_stackData);
 }
 
+static QThreadStorage<Fiber *> qt_currentFiber;
+
 Fiber *Fiber::currentFiber()
 {
+    Fiber *current = qt_currentFiber.localData();
+    if (current)
+        return current;
+
     // establish a context for the starting fiber
-    if (!_currentFiber)
-        _currentFiber = new Fiber(true);
-    
-    return _currentFiber;
+    current = new Fiber;
+    qt_currentFiber.setLocalData(current);
+    return current;
 }
 
 void Fiber::entryPoint()
 {
-    _currentFiber->run();
+    qt_currentFiber.localData()->_startFunction();
     yieldHelper(Terminated);
     Q_ASSERT(0); // unreachable
 }
@@ -94,9 +98,10 @@ bool Fiber::cont()
     Q_ASSERT(_status == NotStarted || _status == Stopped);
     Q_ASSERT(!_previousFiber);
     
-    _previousFiber = _currentFiber;
-    _currentFiber = this;
     _status = Running;
+
+    _previousFiber = qt_currentFiber.localData();
+    qt_currentFiber.setLocalData(this);
     switchStack(_stackPointer, &_previousFiber->_stackPointer);
     return _status != Terminated;
 }
@@ -108,13 +113,15 @@ void Fiber::yield()
 
 void Fiber::yieldHelper(Status stopStatus)
 {
-    Fiber *stoppingFiber = _currentFiber;
+    Fiber *stoppingFiber = qt_currentFiber.localData();
     Q_ASSERT(stoppingFiber);
-    Q_ASSERT(stoppingFiber->_previousFiber);
     Q_ASSERT(stoppingFiber->_status == Running);
-
-    _currentFiber = stoppingFiber->_previousFiber;
-    stoppingFiber->_previousFiber = 0;
     stoppingFiber->_status = stopStatus;
-    switchStack(_currentFiber->_stackPointer, &stoppingFiber->_stackPointer);
+
+    Fiber *continuingFiber = stoppingFiber->_previousFiber;
+    Q_ASSERT(continuingFiber);
+
+    stoppingFiber->_previousFiber = 0;
+    qt_currentFiber.setLocalData(continuingFiber);
+    switchStack(continuingFiber, &stoppingFiber->_stackPointer);
 }
