@@ -1,7 +1,7 @@
-#ifndef INCLUDE_FIBER_H
-#define INCLUDE_FIBER_H
+#ifndef INCLUDE_COROUTINE_H
+#define INCLUDE_COROUTINE_H
 
-class Fiber
+class Coroutine
 {
 public:
     typedef void(*StartFunction)();
@@ -15,8 +15,8 @@ public:
     };
 
 public:
-    explicit Fiber(StartFunction startFunction, int stackSize = 32768);
-    ~Fiber();
+    explicit Coroutine(StartFunction startFunction, int stackSize = 32768);
+    ~Coroutine();
     
     bool cont();
     static void yield();
@@ -24,11 +24,11 @@ public:
     Status status()
     { return _status; }
 
-    static Fiber *currentFiber();
+    static Coroutine *currentCoroutine();
 
 private:
-    // for the original fiber
-    Fiber();
+    // for the original coroutine
+    Coroutine();
 
     static void yieldHelper(Status stopStatus);
     static void entryPoint();
@@ -36,8 +36,8 @@ private:
     StartFunction _startFunction;
     void *_stackData;
     void *_stackPointer;
-    Fiber *_previousFiber;
+    Coroutine *_previousCoroutine;
     Status _status;
 };
 
-#endif // INCLUDE_FIBER_H
+#endif // INCLUDE_COROUTINE_H

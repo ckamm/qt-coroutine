@@ -1,8 +1,8 @@
 TEMPLATE = lib
-TARGET = fibers
+TARGET = coroutine
 
-HEADERS += fiber.h
-SOURCES += fiber.cpp
+HEADERS += coroutine.h
+SOURCES += coroutine.cpp
 
 INCLUDEPATH += .
 DEPENDPATH += .
