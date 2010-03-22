@@ -4,8 +4,6 @@
 class Coroutine
 {
 public:
-    typedef void(*StartFunction)();
-
     enum Status
     {
         NotStarted,
@@ -15,8 +13,8 @@ public:
     };
 
 public:
-    explicit Coroutine(StartFunction startFunction, int stackSize = 32768);
-    ~Coroutine();
+    explicit Coroutine(int stackSize = 32768);
+    virtual ~Coroutine();
     
     bool cont();
     static void yield();
@@ -26,14 +24,16 @@ public:
 
     static Coroutine *currentCoroutine();
 
+protected:
+    virtual void run() {}
+
 private:
     // for the original coroutine
-    Coroutine();
+    Coroutine(bool);
 
     static void yieldHelper(Status stopStatus);
     static void entryPoint();
 
-    StartFunction _startFunction;
     void *_stackData;
     void *_stackPointer;
     Coroutine *_previousCoroutine;

@@ -1,7 +1,12 @@
 TEMPLATE = lib
+DESTDIR = ../lib
 TARGET = coroutine
 
-HEADERS += coroutine.h
+HEADERS += \
+    coroutine.h \
+    coroutinebuild.h \
+    coroutinestoredfunctioncall.h
+
 SOURCES += coroutine.cpp
 
 INCLUDEPATH += .

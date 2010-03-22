@@ -42,9 +42,8 @@ void initializeStack(void *data, int size, void (*entry)(), void **stackPointer)
 void switchStack(void* to, void** from) { _switchStackInternal(to, from); }
 #endif
 
-Coroutine::Coroutine(StartFunction startFunction, int stackSize)
-    : _startFunction(startFunction)
-    , _stackData(0)
+Coroutine::Coroutine(int stackSize)
+    : _stackData(0)
     , _stackPointer(0)
     , _previousCoroutine(0)
     , _status(NotStarted)
@@ -56,9 +55,8 @@ Coroutine::Coroutine(StartFunction startFunction, int stackSize)
     initializeStack(_stackData, stackSize, &entryPoint, &_stackPointer);
 }
 
-Coroutine::Coroutine()
-    : _startFunction(0)
-    , _stackData(0)
+Coroutine::Coroutine(bool)
+    : _stackData(0)
     , _stackPointer(0)
     , _previousCoroutine(0)
     , _status(Running)
@@ -71,23 +69,23 @@ Coroutine::~Coroutine()
         free(_stackData);
 }
 
-static QThreadStorage<Coroutine *> qt_currentCoroutine;
+static QThreadStorage<Coroutine **> qt_currentCoroutine;
 
 Coroutine *Coroutine::currentCoroutine()
 {
-    Coroutine *current = qt_currentCoroutine.localData();
-    if (current)
-        return current;
-
     // establish a context for the starting coroutine
-    current = new Coroutine;
-    qt_currentCoroutine.setLocalData(current);
-    return current;
+    if (!qt_currentCoroutine.hasLocalData()) {
+        Coroutine *current = new Coroutine(true);
+        qt_currentCoroutine.setLocalData(new Coroutine*(current));
+        return current;
+    }
+
+    return *qt_currentCoroutine.localData();
 }
 
 void Coroutine::entryPoint()
 {
-    qt_currentCoroutine.localData()->_startFunction();
+    (*qt_currentCoroutine.localData())->run();
     yieldHelper(Terminated);
     Q_ASSERT(0); // unreachable
 }
@@ -100,8 +98,8 @@ bool Coroutine::cont()
     
     _status = Running;
 
-    _previousCoroutine = qt_currentCoroutine.localData();
-    qt_currentCoroutine.setLocalData(this);
+    _previousCoroutine = *qt_currentCoroutine.localData();
+    *qt_currentCoroutine.localData() = this;
     switchStack(_stackPointer, &_previousCoroutine->_stackPointer);
     return _status != Terminated;
 }
@@ -113,7 +111,7 @@ void Coroutine::yield()
 
 void Coroutine::yieldHelper(Status stopStatus)
 {
-    Coroutine *stoppingCoroutine = qt_currentCoroutine.localData();
+    Coroutine *stoppingCoroutine = *qt_currentCoroutine.localData();
     Q_ASSERT(stoppingCoroutine);
     Q_ASSERT(stoppingCoroutine->_status == Running);
     stoppingCoroutine->_status = stopStatus;
@@ -122,6 +120,6 @@ void Coroutine::yieldHelper(Status stopStatus)
     Q_ASSERT(continuingCoroutine);
 
     stoppingCoroutine->_previousCoroutine = 0;
-    qt_currentCoroutine.setLocalData(continuingCoroutine);
-    switchStack(continuingCoroutine, &stoppingCoroutine->_stackPointer);
+    *qt_currentCoroutine.localData() = continuingCoroutine;
+    switchStack(continuingCoroutine->_stackPointer, &stoppingCoroutine->_stackPointer);
 }
