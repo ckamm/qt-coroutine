@@ -1,0 +1,6 @@
+.gitignore
+*.pro.user
+Makefile
+*.o
+tools/generatebuild/run
+use_coroutine.pri
