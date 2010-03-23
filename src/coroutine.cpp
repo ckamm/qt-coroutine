@@ -144,7 +144,10 @@ void Coroutine::setStack(void *memory, int size)
 static QThreadStorage<Coroutine **> qt_currentCoroutine;
 
 /*!
-  Returns the currently running Coroutine.
+  Returns the currently running Coroutine for the active thread.
+
+  This function will return a unique Coroutine instance that is in the
+  Running state for the initial 'coroutine' of a thread.
 */
 Coroutine *Coroutine::currentCoroutine()
 {
@@ -195,6 +198,10 @@ bool Coroutine::cont()
 
 /*!
   Stops the currently running coroutine and passes control back to the caller of cont().
+
+  It is an error to call this function if the currently running coroutine is
+  the 'root' coroutine of a thread - it does not have a caller that it could pass
+  control to.
 
   \sa cont()
 */
