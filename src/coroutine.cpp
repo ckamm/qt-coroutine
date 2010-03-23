@@ -15,12 +15,6 @@
   on them. Alternatively, it is possible to derive from Coroutine and overriding
   the run() method.
 
-  After creation it is necessary to set up the coroutine's stack. Call either
-  createStack() or setStack() to do so. createStack() will make the coroutine allocate
-  some stack space that it will release on destruction. Using setStack() allows
-  passing in memory that the coroutine will not take ownership of. The latter
-  is useful if you have a lot of coroutines and want to reuse their stack memory.
-
   A coroutine doesn't start execution when it is built. Call cont() to run it.
   This will execute the coroutine's code until it calls Coroutine::yield().
   At that point, the call to cont() returns. Subsequent calls to cont() will
@@ -35,11 +29,15 @@
   }
 
   Coroutine *c = Coroutine::build(&myCoroutine);
-  c->createStack();
   qDebug() << "0.5";
   c.cont(); // prints 1
   qDebug() << "1.5";
   c.cont(); // prints 2
+
+  By default, a Coroutine will create its own stack space using createStack()
+  with the default argument. To manage the stack memory manually or use
+  a stack of a different size, use createStack() or setStack() before starting
+  execution.
 */
 
 /*!
@@ -50,8 +48,6 @@
   pointer to functor, object and member function pointer, or pointer to object
   and member function pointer. In the case of passing functor pointers or
   object pointers, the Coroutine object doesn't take ownership.
-
-  The coroutine will be ready for use after it's stack has been set up.
 */
 
 
@@ -84,6 +80,8 @@ Coroutine::~Coroutine()
 
 void Coroutine::createStack(int size)
 {
+    Q_ASSERT(_status == NotStarted);
+
     if (_stackData)
         free(_stackData);
 
@@ -93,6 +91,13 @@ void Coroutine::createStack(int size)
 
 void Coroutine::setStack(void *memory, int size)
 {
+    Q_ASSERT(_status == NotStarted);
+
+    if (_stackData) {
+        free(_stackData);
+        _stackData = 0;
+    }
+
     initializeStack(memory, size, &entryPoint, &_stackPointer);
 }
 
@@ -124,7 +129,9 @@ bool Coroutine::cont()
 {    
     Q_ASSERT(_status == NotStarted || _status == Stopped);
     Q_ASSERT(!_previousCoroutine);
-    Q_ASSERT(_stackPointer);
+
+    if (!_stackPointer)
+        createStack();
 
     _status = Running;
 
