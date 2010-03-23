@@ -42,12 +42,35 @@
 
 /*!
   \fn Coroutine *Coroutine::build(Function function, ...)
-  \brief Creates a new Coroutine from a callable object.
+
+  Creates a new Coroutine from a callable object.
 
   The callable object, Function, can be a function pointer, functor or
   pointer to functor, object and member function pointer, or pointer to object
   and member function pointer. In the case of passing functor pointers or
   object pointers, the Coroutine object doesn't take ownership.
+*/
+
+/*!
+  \enum Coroutine::Status
+
+  Specifies the current state of a coroutine.
+
+  \value NotStarted  Before the first call to cont()
+  \value Running     The coroutine is currently running. Note that if a coroutine
+                     starts another coroutine, both will be in the Running state. Use
+                     currentCoroutine() to get the active one.
+  \value Stopped     The coroutine has called yield() at least once but can still be
+                     continued with cont().
+  \value Terminated  The coroutine has finished executing.
+
+  \sa Coroutine::status()
+*/
+
+/*!
+  \fn Coroutine::Status Coroutine::status() const
+
+  Returns the status of the coroutine.
 */
 
 
@@ -79,11 +102,12 @@ Coroutine::~Coroutine()
 }
 
 /*!
-  \brief Creates a stack of the given size for the coroutine.
-
+  Creates a stack of the given size for the coroutine.
   The memory is owned by the Coroutine object and will be deleted on destruction.
 
   Calling this function is only valid when in the NotStarted state.
+
+  \sa setStack()
 */
 void Coroutine::createStack(int size)
 {
@@ -97,11 +121,12 @@ void Coroutine::createStack(int size)
 }
 
 /*!
-  \brief Initializes the given area of memory to serve as the stack for the coroutine.
-
+  Initializes the given area of memory to serve as the stack for the coroutine.
   The Coroutine object does not take ownership.
 
   Calling this function is only valid when in the NotStarted state.
+
+  \sa createStack()
 */
 void Coroutine::setStack(void *memory, int size)
 {
@@ -118,7 +143,7 @@ void Coroutine::setStack(void *memory, int size)
 static QThreadStorage<Coroutine **> qt_currentCoroutine;
 
 /*!
-  \brief Returns the currently running Coroutine.
+  Returns the currently running Coroutine.
 */
 Coroutine *Coroutine::currentCoroutine()
 {
@@ -142,13 +167,14 @@ void Coroutine::entryPoint()
 }
 
 /*!
-  \brief Passes control to the coroutine.
-
+  Passes control to the coroutine.
   The coroutine will run until it terminates or is stopped by a call to yield().
 
   Returns whether it can be continued again.
 
   Calling this function is only valid if in the NotStarted or Stopped state.
+
+  \sa yield()
 */
 bool Coroutine::cont()
 {    
@@ -167,9 +193,9 @@ bool Coroutine::cont()
 }
 
 /*!
-  \brief Stops the currently running coroutine.
+  Stops the currently running coroutine and passes control back to the caller of cont().
 
-  And passes control back to the caller of cont().
+  \sa cont()
 */
 void Coroutine::yield()
 {

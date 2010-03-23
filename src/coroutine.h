@@ -22,7 +22,7 @@ public:
     bool cont();
     static void yield();
     
-    Status status()
+    Status status() const
     { return _status; }
 
     static Coroutine *currentCoroutine();
