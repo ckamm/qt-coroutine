@@ -8,6 +8,8 @@ Q_OBJECT
 private slots:
     void noYield();
     void coroutineStartingCoroutine();
+    void smallStack();
+    void reuseStack();
 };
 
 class NoYieldCoro : public Coroutine
@@ -113,6 +115,61 @@ void tst_basic::coroutineStartingCoroutine()
     QCOMPARE(base->status(), Coroutine::Terminated);
     QCOMPARE(c1->status(), Coroutine::Terminated);
     QCOMPARE(Coroutine::currentCoroutine(), start);
+
+    delete c1;
+    delete base;
+}
+
+namespace StackTests {
+    static int counter = 0;
+    static void simpleCoroutine()
+    {
+        while(true) {
+            counter++;
+            Coroutine::yield();
+        }
+    }
+}
+
+void tst_basic::smallStack()
+{
+    using namespace StackTests;
+
+    Coroutine *c = Coroutine::build(&simpleCoroutine);
+    c->createStack(1000);
+    counter = 0;
+    QCOMPARE(c->cont(), true);
+    QCOMPARE(counter, 1);
+    QCOMPARE(c->cont(), true);
+    QCOMPARE(counter, 2);
+    delete c;
+}
+
+void tst_basic::reuseStack()
+{
+    using namespace StackTests;
+
+    char* p = new char[10000];
+
+    Coroutine *c1 = Coroutine::build(&simpleCoroutine);
+    c1->setStack(p, 10000);
+    counter = 0;
+    QCOMPARE(c1->cont(), true);
+    QCOMPARE(counter, 1);
+    QCOMPARE(c1->cont(), true);
+    QCOMPARE(counter, 2);
+    delete c1;
+
+    Coroutine *c2 = Coroutine::build(&simpleCoroutine);
+    c2->setStack(p, 10000);
+    counter = 0;
+    QCOMPARE(c2->cont(), true);
+    QCOMPARE(counter, 1);
+    QCOMPARE(c2->cont(), true);
+    QCOMPARE(counter, 2);
+    delete c2;
+
+    delete [] p;
 }
 
 QTEST_MAIN(tst_basic)
