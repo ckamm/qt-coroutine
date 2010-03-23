@@ -30,6 +30,10 @@ public:
 protected:
     virtual void run() {}
 
+private: // not copyable
+    Coroutine(const Coroutine &);
+    Coroutine &operator=(const Coroutine &);
+
 private:
     // for the original coroutine
     Coroutine(bool);
