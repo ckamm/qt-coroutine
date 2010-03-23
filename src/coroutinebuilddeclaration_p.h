@@ -11,7 +11,7 @@
 
 #ifdef qdoc
 
-    static Coroutine* build(Function function, ...);
+    static Coroutine* build(int stackSize, Function function, ...);
 
 #else
 

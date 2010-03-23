@@ -336,7 +336,7 @@ int main()
                        Line("") +
                        Line("#ifdef qdoc") +
                        Line("") +
-                       Line("    static Coroutine* build(Function function, ...);") +
+                       Line("    static Coroutine* build(int stackSize, Function function, ...);") +
                        Line("") +
                        Line("#else") +
                        Line("") +

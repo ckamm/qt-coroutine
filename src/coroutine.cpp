@@ -11,9 +11,12 @@
   Coroutines, also known as fibers, allow managing multiple stacks in the same
   thread.
 
-  \omit ### outdated \endomit
-  To create a coroutine, subclass Coroutine and override the run() method. To run it,
-  call cont(). This will execute the code in run() until it calls Coroutine::yield().
+  New coroutines are made from functions, functors, etc by invoking Coroutine::build
+  on them. Alternatively, it's possible to derive from Coroutine and overriding
+  the run() method.
+
+  A coroutine doesn't start execution when it is built. Call cont() to run it.
+  This will execute the coroutine's code until it calls Coroutine::yield().
   At that point, the call to cont() returns. Subsequent calls to cont() will
   continue execution of the coroutine just after the yield().
 
@@ -25,12 +28,27 @@
       qDebug() << "2";
   }
 
-  MyCoroutine c(&myCoroutine);
+  Coroutine *c = Coroutine::build(32000, &myCoroutine);
   qDebug() << "0.5";
   c.cont(); // prints 1
   qDebug() << "1.5";
   c.cont(); // prints 2
 */
+
+/*!
+  \fn Coroutine *Coroutine::build(int stackSize, Function function, ...)
+  \brief Creates a new Coroutine from a callable object.
+
+  The callable object, Function, can be a function pointer, functor or
+  pointer to functor, object and member function pointer, or pointer to object
+  and member function pointer. In the case of passing functor pointers or
+  object pointers, the Coroutine object doesn't take ownership.
+
+  The stackSize value denotes the size of the stack the coroutine will allocate
+  for execution.
+*/
+
+
 
 #ifdef Q_OS_MAC
 extern "C" void switchStackInternal(void* to, void** from);
