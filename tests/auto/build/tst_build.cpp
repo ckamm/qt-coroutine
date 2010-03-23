@@ -1,6 +1,5 @@
 #include <QtTest/QtTest>
 #include <coroutine.h>
-#include <coroutinebuild.h>
 
 class tst_build: public QObject
 {
@@ -33,7 +32,7 @@ static void fnArg(int start)
 
 void tst_build::staticFn()
 {
-    Coroutine* c1 = build(32000, &fnNoArg);
+    Coroutine* c1 = Coroutine::build(32000, &fnNoArg);
     QCOMPARE(fnCounter, -99);
     QCOMPARE(c1->cont(), true);
     QCOMPARE(fnCounter, 0);
@@ -43,7 +42,7 @@ void tst_build::staticFn()
     QCOMPARE(fnCounter, 2);
     delete c1;
 
-    Coroutine* c2 = build(32000, &fnArg, 40);
+    Coroutine* c2 = Coroutine::build(32000, &fnArg, 40);
     QCOMPARE(c2->cont(), true);
     QCOMPARE(fnCounter, 40);
     QCOMPARE(c2->cont(), true);

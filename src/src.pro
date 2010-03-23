@@ -4,8 +4,9 @@ TARGET = coroutine
 
 HEADERS += \
     coroutine.h \
-    coroutinebuild.h \
-    coroutinestoredfunctioncall.h
+    coroutinebuilddeclaration_p.h \
+    coroutinebuilddefinition_p.h \
+    coroutinestoredfunctioncall_p.h
 
 SOURCES += coroutine.cpp
 

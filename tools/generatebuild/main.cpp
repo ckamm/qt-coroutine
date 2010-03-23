@@ -93,8 +93,9 @@ Item Line(Item item)
     return item + "\n";
 }
 
-Item generateBuildFunctions(int repeats)
+Item generateBuildFunctionDefinitions(int repeats)
 {
+    Item nameReturn = "Coroutine* Coroutine::build(";
     Item functionPointerType = "void (*)(" + parameterTypesNoPrefix + ")";
 
     Item functionPointerParameter = "void (*functionPointer)(" + parameterTypesNoPrefix + ")";
@@ -106,7 +107,7 @@ Item generateBuildFunctions(int repeats)
 
     // plain functions
     Repeater functions = Line (typenameTypesWithTemplate) +
-                         Line ("Coroutine* build(" + stackSizeParameter + functionPointerParameter + functionParameters + ")")  +
+                         Line (nameReturn + stackSizeParameter + functionPointerParameter + functionParameters + ")")  +
                          Line("{") +
                          Line("    return new StoredFunctorCall" + Counter() + "<" +
                                    functionPointerType + argumentTypes + ">(" + stackSizeArgument + "functionPointer" + arguments + ");") +
@@ -115,7 +116,7 @@ Item generateBuildFunctions(int repeats)
 
     // function objects by value
     Repeater functionObjects =  Line ("template <typename FunctionObject" + typenameArgumentTypes + ">") +
-                                Line ("Coroutine* build(" + stackSizeParameter + "FunctionObject functionObject" + functionParameters + ")") +
+                                Line (nameReturn + stackSizeParameter + "FunctionObject functionObject" + functionParameters + ")") +
                                 Line("{") +
                                 Line("    return new StoredFunctorCall" + Counter() +
                                      "<FunctionObject" +
@@ -125,7 +126,7 @@ Item generateBuildFunctions(int repeats)
 
     // function objects by pointer
     Repeater functionObjectsPointer =  Line ("template <typename FunctionObject" + typenameArgumentTypes + ">") +
-                                Line ("Coroutine* build(" + stackSizeParameter + "FunctionObject *functionObject" + functionParameters + ")") +
+                                Line (nameReturn + stackSizeParameter + "FunctionObject *functionObject" + functionParameters + ")") +
                                 Line("{") +
                                 Line("    return new StoredFunctorPointerCall" + Counter() +
                                      "<FunctionObject" +
@@ -135,7 +136,7 @@ Item generateBuildFunctions(int repeats)
 
     // member functions by value
     Repeater memberFunction =  Line ("template <typename Class" + typenameTypes + ">") +
-                                Line ("Coroutine* build(" + stackSizeParameter + "const Class &object, void (Class::*fn)(" + parameterTypesNoPrefix  + ")" + functionParameters + ")") +
+                                Line (nameReturn + stackSizeParameter + "const Class &object, void (Class::*fn)(" + parameterTypesNoPrefix  + ")" + functionParameters + ")") +
                                 Line("{") +
                                 Line("    return new StoredMemberFunctionCall" + Counter() +
                                      "<Class" +
@@ -145,7 +146,7 @@ Item generateBuildFunctions(int repeats)
 
     // const member functions by value
     Repeater constMemberFunction =  Line ("template <typename Class" + typenameTypes + ">") +
-                                Line ("Coroutine *build(" + stackSizeParameter + "const Class &object, void (Class::*fn)(" + parameterTypesNoPrefix  + ") const" + functionParameters + ")") +
+                                Line (nameReturn + stackSizeParameter + "const Class &object, void (Class::*fn)(" + parameterTypesNoPrefix  + ") const" + functionParameters + ")") +
                                 Line("{") +
                                 Line("    return new StoredConstMemberFunctionCall" + Counter() +
                                      "<Class" +
@@ -155,7 +156,7 @@ Item generateBuildFunctions(int repeats)
 
     // member functions by class pointer
     Repeater memberFunctionPointer =  Line ("template <typename Class" + typenameTypes + ">") +
-                                Line ("Coroutine* build(" + stackSizeParameter + "Class *object, void (Class::*fn)(" + parameterTypesNoPrefix  + ")" + functionParameters + ")") +
+                                Line (nameReturn + stackSizeParameter + "Class *object, void (Class::*fn)(" + parameterTypesNoPrefix  + ")" + functionParameters + ")") +
                                 Line("{") +
                                 Line("    return new StoredMemberFunctionPointerCall" + Counter() +
                                      "<Class" +
@@ -165,7 +166,7 @@ Item generateBuildFunctions(int repeats)
 
     // const member functions by class pointer
     Repeater constMemberFunctionPointer =  Line ("template <typename Class" + typenameTypes + ">") +
-                                Line ("Coroutine* build(" + stackSizeParameter + "const Class *object, void (Class::*fn)(" + parameterTypesNoPrefix  + ") const" + functionParameters + ")") +
+                                Line (nameReturn + stackSizeParameter + "const Class *object, void (Class::*fn)(" + parameterTypesNoPrefix  + ") const" + functionParameters + ")") +
                                 Line("{") +
                                 Line("    return new StoredConstMemberFunctionPointerCall" + Counter() +
                                      "<Class" +
@@ -180,6 +181,58 @@ Item generateBuildFunctions(int repeats)
     ;
 }
 
+Item generateBuildFunctionDeclarations(int repeats)
+{
+    Item functionPointerType = "void (*)(" + parameterTypesNoPrefix + ")";
+
+    Item functionPointerParameter = "void (*functionPointer)(" + parameterTypesNoPrefix + ")";
+
+    Item stackSizeParameter = "int stackSize, ";
+    Item stackSizeArgument = "stackSize, ";
+
+
+
+    // plain functions
+    Repeater functions = Line (typenameTypesWithTemplate) +
+                         Line ("static Coroutine* build(" + stackSizeParameter + functionPointerParameter + functionParameters + ");");
+    functions.setRepeatCount(repeats);
+
+    // function objects by value
+    Repeater functionObjects =  Line ("template <typename FunctionObject" + typenameArgumentTypes + ">") +
+                                Line ("static Coroutine* build(" + stackSizeParameter + "FunctionObject functionObject" + functionParameters + ");");
+    functionObjects.setRepeatCount(repeats);
+
+    // function objects by pointer
+    Repeater functionObjectsPointer =  Line ("template <typename FunctionObject" + typenameArgumentTypes + ">") +
+                                Line ("static Coroutine* build(" + stackSizeParameter + "FunctionObject *functionObject" + functionParameters + ");");
+    functionObjectsPointer.setRepeatCount(repeats);
+
+    // member functions by value
+    Repeater memberFunction =  Line ("template <typename Class" + typenameTypes + ">") +
+                                Line ("static Coroutine* build(" + stackSizeParameter + "const Class &object, void (Class::*fn)(" + parameterTypesNoPrefix  + ")" + functionParameters + ");");
+    memberFunction.setRepeatCount(repeats);
+
+    // const member functions by value
+    Repeater constMemberFunction =  Line ("template <typename Class" + typenameTypes + ">") +
+                                Line ("static Coroutine *build(" + stackSizeParameter + "const Class &object, void (Class::*fn)(" + parameterTypesNoPrefix  + ") const" + functionParameters + ");");
+    constMemberFunction.setRepeatCount(repeats);
+
+    // member functions by class pointer
+    Repeater memberFunctionPointer =  Line ("template <typename Class" + typenameTypes + ">") +
+                                Line ("static Coroutine* build(" + stackSizeParameter + "Class *object, void (Class::*fn)(" + parameterTypesNoPrefix  + ")" + functionParameters + ");");
+    memberFunctionPointer.setRepeatCount(repeats);
+
+    // const member functions by class pointer
+    Repeater constMemberFunctionPointer =  Line ("template <typename Class" + typenameTypes + ">") +
+                                Line ("static Coroutine* build(" + stackSizeParameter + "const Class *object, void (Class::*fn)(" + parameterTypesNoPrefix  + ") const" + functionParameters + ");");
+    constMemberFunctionPointer.setRepeatCount(repeats);
+
+
+    return functions + Line("") + functionObjects + Line("") + functionObjectsPointer + Line("")
+          + memberFunction + Line("") + constMemberFunction + Line("")
+          + memberFunctionPointer + Line("") + constMemberFunctionPointer + Line("")
+    ;
+}
 
 Item functions(Item className, Item functorType, Item callLine)
 {
@@ -280,42 +333,44 @@ int main()
                        Line("****************************************************************************/") +
                        Line("") +
                        Line("// Generated code, do not edit! Use generator at tools/generatebuild/") +
-                       Line("#ifndef COROUTINE_MAKE_H") +
-                       Line("#define COROUTINE_MAKE_H") +
-                       Line("") +
-                       Line("#include \"coroutine.h\"") +
-                       Line("#include \"coroutinestoredfunctioncall.h\"") +
-//                       Line("") +
-//                       Line("QT_BEGIN_HEADER") +
-//                       Line("QT_BEGIN_NAMESPACE") +
-//                       Line("") +
-//                       Line("QT_MODULE(Core)") +
                        Line("") +
                        Line("#ifdef qdoc") +
-//                       Line("") +
-//                       Line("namespace Coroutine {") +
                        Line("") +
-                       Line("    Coroutine* build(Function function, ...);") +
-//                       Line("") +
-//                       Line("} // namespace Coroutine") +
+                       Line("    static Coroutine* build(Function function, ...);") +
                        Line("") +
                        Line("#else") +
-//                       Line("") +
-//                       Line("namespace Coroutine {") +
                        Line("") +
-                       generateBuildFunctions(repeats) +
-//                       Line("") +
-//                       Line("} //namespace Coroutine") +
+                       generateBuildFunctionDeclarations(repeats) +
                        Line("") +
                        Line("#endif // qdoc") +
-                       Line("") +
-//                       Line("QT_END_NAMESPACE") +
-//                       Line("QT_END_HEADER") +
-//                       Line("") +
-                       Line("#endif")
+                       Line("")
                       );
 
-    writeFile("../../src/coroutinebuild.h", run.generate());
+    writeFile("../../src/coroutinebuilddeclaration_p.h", run.generate());
+
+    Item buildDefinition =  (
+                       Line("/****************************************************************************") +
+                       Line("**") +
+                       Line("** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).") +
+                       Line("** Contact: Nokia Corporation (qt-info@nokia.com)") +
+                       Line("**") +
+                       Line("** This file is part of the Qt Toolkit.") +
+                       Line("**") +
+                       Line("****************************************************************************/") +
+                       Line("") +
+                       Line("// Generated code, do not edit! Use generator at tools/generatebuild/") +
+                       Line("") +
+                       Line("#include \"coroutinestoredfunctioncall_p.h\"") +
+                       Line("") +
+                       Line("#ifndef qdoc") +
+                       Line("") +
+                       generateBuildFunctionDefinitions(repeats) +
+                       Line("") +
+                       Line("#endif // qdoc") +
+                       Line("")
+                      );
+
+    writeFile("../../src/coroutinebuilddefinition_p.h", buildDefinition.generate());
 
     Item storedFunctionCall = (
                                      Line("/****************************************************************************") +
@@ -331,29 +386,16 @@ int main()
                                      Line("#ifndef COROUTINE_STOREDFUNCTIONCALL_H") +
                                      Line("#define COROUTINE_STOREDFUNCTIONCALL_H") +
                                      Line("") +
-                                     Line("#include \"coroutine.h\"") +
-//                                     Line("#include <QtCore/qtconcurrentrunbase.h>") +
-//                                     Line("") +
-//                                     Line("QT_BEGIN_HEADER") +
-//                                     Line("QT_BEGIN_NAMESPACE") +
-//                                     Line("") +
-//                                     Line("QT_MODULE(Core)") +
-//                                     Line("") +
                                      Line("#ifndef qdoc") +
                                      Line("") +
-//                                     Line("namespace Coroutine {") +
                                      generateSFCs(repeats) +
-//                                     Line("} //namespace Coroutine") +
                                      Line("") +
                                      Line("#endif // qdoc") +
                                      Line("") +
-//                                     Line("QT_END_NAMESPACE") +
-//                                     Line("QT_END_HEADER") +
-//                                     Line("") +
                                      Line("#endif")
                                     );
 
-    writeFile("../../src/coroutinestoredfunctioncall.h", storedFunctionCall.generate());
+    writeFile("../../src/coroutinestoredfunctioncall_p.h", storedFunctionCall.generate());
 }
 
 

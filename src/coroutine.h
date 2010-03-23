@@ -24,6 +24,9 @@ public:
 
     static Coroutine *currentCoroutine();
 
+// add declarations for static build(...) function
+#include "coroutinebuilddeclaration_p.h"
+
 protected:
     virtual void run() {}
 
@@ -39,5 +42,8 @@ private:
     Coroutine *_previousCoroutine;
     Status _status;
 };
+
+// add definitions for static build(...) function
+#include "coroutinebuilddefinition_p.h"
 
 #endif // INCLUDE_COROUTINE_H

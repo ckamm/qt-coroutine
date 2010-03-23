@@ -11,7 +11,6 @@
 #ifndef COROUTINE_STOREDFUNCTIONCALL_H
 #define COROUTINE_STOREDFUNCTIONCALL_H
 
-#include "coroutine.h"
 #ifndef qdoc
 
 template <typename FunctionPointer>
