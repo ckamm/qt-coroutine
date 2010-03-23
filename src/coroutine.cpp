@@ -30,9 +30,9 @@
 
   Coroutine *c = Coroutine::build(&myCoroutine);
   qDebug() << "0.5";
-  c.cont(); // prints 1
+  c->cont(); // prints 1
   qDebug() << "1.5";
-  c.cont(); // prints 2
+  c->cont(); // prints 2
   \endcode
 
   By default, a Coroutine will create its own stack space using createStack()
