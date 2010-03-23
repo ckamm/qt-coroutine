@@ -32,7 +32,8 @@ static void fnArg(int start)
 
 void tst_build::staticFn()
 {
-    Coroutine* c1 = Coroutine::build(32000, &fnNoArg);
+    Coroutine* c1 = Coroutine::build(&fnNoArg);
+    c1->createStack();
     QCOMPARE(fnCounter, -99);
     QCOMPARE(c1->cont(), true);
     QCOMPARE(fnCounter, 0);
@@ -42,7 +43,8 @@ void tst_build::staticFn()
     QCOMPARE(fnCounter, 2);
     delete c1;
 
-    Coroutine* c2 = Coroutine::build(32000, &fnArg, 40);
+    Coroutine* c2 = Coroutine::build(&fnArg, 40);
+    c2->createStack();
     QCOMPARE(c2->cont(), true);
     QCOMPARE(fnCounter, 40);
     QCOMPARE(c2->cont(), true);

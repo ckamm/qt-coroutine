@@ -13,8 +13,11 @@ public:
     };
 
 public:
-    explicit Coroutine(int stackSize = 32768);
+    Coroutine();
     virtual ~Coroutine();
+
+    void createStack(int size = 32768);
+    void setStack(void *memory, int size);
     
     bool cont();
     static void yield();
@@ -35,9 +38,6 @@ private: // not copyable
     Coroutine &operator=(const Coroutine &);
 
 private:
-    // for the original coroutine
-    Coroutine(bool);
-
     static void yieldHelper(Status stopStatus);
     static void entryPoint();
 

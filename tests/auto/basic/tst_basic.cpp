@@ -25,6 +25,7 @@ public:
 void tst_basic::noYield()
 {
     NoYieldCoro coro;
+    coro.createStack();
     coro.i = 0;
     QCOMPARE(coro.status(), Coroutine::NotStarted);
     QCOMPARE(coro.cont(), false);
