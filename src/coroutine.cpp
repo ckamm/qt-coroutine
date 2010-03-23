@@ -35,7 +35,7 @@
   c.cont(); // prints 2
 
   By default, a Coroutine will create its own stack space using createStack()
-  with the default argument. To manage the stack memory manually or use
+  with the default argument. To manage the stack memory manually or to use
   a stack of a different size, use createStack() or setStack() before starting
   execution.
 */
@@ -78,6 +78,13 @@ Coroutine::~Coroutine()
         free(_stackData);
 }
 
+/*!
+  \brief Creates a stack of the given size for the coroutine.
+
+  The memory is owned by the Coroutine object and will be deleted on destruction.
+
+  Calling this function is only valid when in the NotStarted state.
+*/
 void Coroutine::createStack(int size)
 {
     Q_ASSERT(_status == NotStarted);
@@ -89,6 +96,13 @@ void Coroutine::createStack(int size)
     initializeStack(_stackData, size, &entryPoint, &_stackPointer);
 }
 
+/*!
+  \brief Initializes the given area of memory to serve as the stack for the coroutine.
+
+  The Coroutine object does not take ownership.
+
+  Calling this function is only valid when in the NotStarted state.
+*/
 void Coroutine::setStack(void *memory, int size)
 {
     Q_ASSERT(_status == NotStarted);
@@ -103,6 +117,9 @@ void Coroutine::setStack(void *memory, int size)
 
 static QThreadStorage<Coroutine **> qt_currentCoroutine;
 
+/*!
+  \brief Returns the currently running Coroutine.
+*/
 Coroutine *Coroutine::currentCoroutine()
 {
     // establish a context for the starting coroutine
@@ -124,7 +141,15 @@ void Coroutine::entryPoint()
     Q_ASSERT(0); // unreachable
 }
 
-// returns whether it can be continued again
+/*!
+  \brief Passes control to the coroutine.
+
+  The coroutine will run until it terminates or is stopped by a call to yield().
+
+  Returns whether it can be continued again.
+
+  Calling this function is only valid if in the NotStarted or Stopped state.
+*/
 bool Coroutine::cont()
 {    
     Q_ASSERT(_status == NotStarted || _status == Stopped);
@@ -141,6 +166,11 @@ bool Coroutine::cont()
     return _status != Terminated;
 }
 
+/*!
+  \brief Stops the currently running coroutine.
+
+  And passes control back to the caller of cont().
+*/
 void Coroutine::yield()
 {
     yieldHelper(Stopped);
