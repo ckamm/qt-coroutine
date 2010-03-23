@@ -11,8 +11,6 @@
 #ifndef COROUTINE_STOREDFUNCTIONCALL_H
 #define COROUTINE_STOREDFUNCTIONCALL_H
 
-#ifndef qdoc
-
 template <typename FunctionPointer>
 struct StoredFunctorCall0: public Coroutine
 {
@@ -529,7 +527,5 @@ private:
     Class const *object;
     Arg1 arg1; Arg2 arg2; Arg3 arg3; Arg4 arg4; Arg5 arg5;
 };
-
-#endif // qdoc
 
 #endif

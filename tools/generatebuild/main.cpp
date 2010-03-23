@@ -327,15 +327,7 @@ int main()
                        Line("") +
                        Line("// Generated code, do not edit! Use generator at tools/generatebuild/") +
                        Line("") +
-                       Line("#ifdef qdoc") +
-                       Line("") +
-                       Line("    static Coroutine* build(Function function, ...);") +
-                       Line("") +
-                       Line("#else") +
-                       Line("") +
                        generateBuildFunctionDeclarations(repeats) +
-                       Line("") +
-                       Line("#endif // qdoc") +
                        Line("")
                       );
 
@@ -355,11 +347,7 @@ int main()
                        Line("") +
                        Line("#include \"coroutinestoredfunctioncall_p.h\"") +
                        Line("") +
-                       Line("#ifndef qdoc") +
-                       Line("") +
                        generateBuildFunctionDefinitions(repeats) +
-                       Line("") +
-                       Line("#endif // qdoc") +
                        Line("")
                       );
 
@@ -379,11 +367,7 @@ int main()
                                      Line("#ifndef COROUTINE_STOREDFUNCTIONCALL_H") +
                                      Line("#define COROUTINE_STOREDFUNCTIONCALL_H") +
                                      Line("") +
-                                     Line("#ifndef qdoc") +
-                                     Line("") +
                                      generateSFCs(repeats) +
-                                     Line("") +
-                                     Line("#endif // qdoc") +
                                      Line("") +
                                      Line("#endif")
                                     );

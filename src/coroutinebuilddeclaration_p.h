@@ -9,12 +9,6 @@
 
 // Generated code, do not edit! Use generator at tools/generatebuild/
 
-#ifdef qdoc
-
-    static Coroutine* build(Function function, ...);
-
-#else
-
 
 static Coroutine* build(void (*functionPointer)());
 template <typename Param1, typename Arg1>
@@ -106,6 +100,4 @@ static Coroutine* build(const Class *object, void (Class::*fn)(Param1, Param2, P
 template <typename Class, typename Param1, typename Arg1, typename Param2, typename Arg2, typename Param3, typename Arg3, typename Param4, typename Arg4, typename Param5, typename Arg5>
 static Coroutine* build(const Class *object, void (Class::*fn)(Param1, Param2, Param3, Param4, Param5) const, const Arg1 &arg1, const Arg2 &arg2, const Arg3 &arg3, const Arg4 &arg4, const Arg5 &arg5);
 
-
-#endif // qdoc
 

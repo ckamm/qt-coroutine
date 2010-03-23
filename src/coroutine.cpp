@@ -11,7 +11,7 @@
   Coroutines, also known as fibers, allow managing multiple stacks in the same
   thread.
 
-  New coroutines are made from functions, functors, etc by invoking Coroutine::build
+  New coroutines are made from functions, functors, etc by invoking Coroutine::build()
   on them. Alternatively, it is possible to derive from Coroutine and overriding
   the run() method.
 
@@ -20,7 +20,7 @@
   At that point, the call to cont() returns. Subsequent calls to cont() will
   continue execution of the coroutine just after the yield().
 
-  Example:
+  \code
   void myCoroutine()
   {
       qDebug() << "1";
@@ -33,6 +33,7 @@
   c.cont(); // prints 1
   qDebug() << "1.5";
   c.cont(); // prints 2
+  \endcode
 
   By default, a Coroutine will create its own stack space using createStack()
   with the default argument. To manage the stack memory manually or to use
@@ -41,11 +42,11 @@
 */
 
 /*!
-  \fn Coroutine *Coroutine::build(Function function, ...)
+  \fn static Coroutine *Coroutine::build(Function function, ...)
 
   Creates a new Coroutine from a callable object.
 
-  The callable object, Function, can be a function pointer, functor or
+  The callable object, \a function, can be a function pointer, functor or
   pointer to functor, object and member function pointer, or pointer to object
   and member function pointer. In the case of passing functor pointers or
   object pointers, the Coroutine object doesn't take ownership.
@@ -102,7 +103,7 @@ Coroutine::~Coroutine()
 }
 
 /*!
-  Creates a stack of the given size for the coroutine.
+  Creates a stack of the given \a size for the coroutine.
   The memory is owned by the Coroutine object and will be deleted on destruction.
 
   Calling this function is only valid when in the NotStarted state.
@@ -121,8 +122,8 @@ void Coroutine::createStack(int size)
 }
 
 /*!
-  Initializes the given area of memory to serve as the stack for the coroutine.
-  The Coroutine object does not take ownership.
+  Initializes the area given by \a memory and \a size to serve as the stack
+  for the coroutine. The Coroutine object does not take ownership.
 
   Calling this function is only valid when in the NotStarted state.
 

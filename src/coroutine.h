@@ -27,6 +27,9 @@ public:
 
     static Coroutine *currentCoroutine();
 
+#ifdef qdoc
+    static Coroutine* build(Function function, ...);
+#endif
 // add declarations for static build(...) function
 #include "coroutinebuilddeclaration_p.h"
 

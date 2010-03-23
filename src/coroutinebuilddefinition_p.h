@@ -11,8 +11,6 @@
 
 #include "coroutinestoredfunctioncall_p.h"
 
-#ifndef qdoc
-
 
 Coroutine* Coroutine::build(void (*functionPointer)())
 {
@@ -230,6 +228,4 @@ Coroutine* Coroutine::build(const Class *object, void (Class::*fn)(Param1, Param
     return new StoredConstMemberFunctionPointerCall5<Class, Param1, Arg1, Param2, Arg2, Param3, Arg3, Param4, Arg4, Param5, Arg5>(fn, object, arg1, arg2, arg3, arg4, arg5);
 }
 
-
-#endif // qdoc
 
