@@ -89,7 +89,7 @@ void switchStack(void* to, void** from) { _switchStackInternal(to, from); }
 Coroutine::Coroutine()
     : _stackData(0)
     , _stackPointer(0)
-    , _previousCoroutine(0)
+    , _caller(0)
     , _status(NotStarted)
 {
     // establish starting coroutine context if necessary
@@ -180,16 +180,16 @@ void Coroutine::entryPoint()
 bool Coroutine::cont()
 {    
     Q_ASSERT(_status == NotStarted || _status == Stopped);
-    Q_ASSERT(!_previousCoroutine);
+    Q_ASSERT(!_caller);
 
     if (!_stackPointer)
         createStack();
 
     _status = Running;
 
-    _previousCoroutine = *qt_currentCoroutine.localData();
+    _caller = *qt_currentCoroutine.localData();
     *qt_currentCoroutine.localData() = this;
-    switchStack(_stackPointer, &_previousCoroutine->_stackPointer);
+    switchStack(_stackPointer, &_caller->_stackPointer);
     return _status != Terminated;
 }
 
@@ -210,10 +210,10 @@ void Coroutine::yieldHelper(Status stopStatus)
     Q_ASSERT(stoppingCoroutine->_status == Running);
     stoppingCoroutine->_status = stopStatus;
 
-    Coroutine *continuingCoroutine = stoppingCoroutine->_previousCoroutine;
+    Coroutine *continuingCoroutine = stoppingCoroutine->_caller;
     Q_ASSERT(continuingCoroutine);
 
-    stoppingCoroutine->_previousCoroutine = 0;
+    stoppingCoroutine->_caller = 0;
     *qt_currentCoroutine.localData() = continuingCoroutine;
     switchStack(continuingCoroutine->_stackPointer, &stoppingCoroutine->_stackPointer);
 }

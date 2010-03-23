@@ -28,7 +28,7 @@ public:
     static Coroutine *currentCoroutine();
 
 #ifdef qdoc
-    static Coroutine* build(Function function, ...);
+    static Coroutine *build(Function function, ...);
 #endif
 // add declarations for static build(...) function
 #include "coroutinebuilddeclaration_p.h"
@@ -46,7 +46,7 @@ private:
 
     void *_stackData;
     void *_stackPointer;
-    Coroutine *_previousCoroutine;
+    Coroutine *_caller;
     Status _status;
 };
 
