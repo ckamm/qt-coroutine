@@ -141,6 +141,9 @@ void Coroutine::setStack(void *memory, int size)
     initializeStack(memory, size, &entryPoint, &_stackPointer);
 }
 
+// owns the per-thread root coroutine, required to assure deletion on thread exit
+static QThreadStorage<Coroutine *> qt_threadRootCoroutine;
+// points to the currently running coroutine
 static QThreadStorage<Coroutine **> qt_currentCoroutine;
 
 /*!
@@ -153,9 +156,13 @@ Coroutine *Coroutine::currentCoroutine()
 {
     // establish a context for the starting coroutine
     if (!qt_currentCoroutine.hasLocalData()) {
+        // set qt_currentCoroutine before actually constructing the root
+        // coroutine to avoid recursing through the constructor call below
         Coroutine **currentPtr = new Coroutine*;
         qt_currentCoroutine.setLocalData(currentPtr);
+
         *currentPtr = new Coroutine;
+        qt_threadRootCoroutine.setLocalData(*currentPtr);
         (*currentPtr)->_status = Running;
         return *currentPtr;
     }
