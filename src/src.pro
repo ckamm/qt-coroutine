@@ -1,9 +1,14 @@
 TEMPLATE = lib
+CONFIG += dll
+DEFINES += COROUTINE_LIBRARY
+unix: CONFIG += hide_symbols
+
 DESTDIR = ../lib
 TARGET = coroutine
 
 HEADERS += \
     coroutine.h \
+    coroutine_global.h \
     coroutinebuilddeclaration_p.h \
     coroutinebuilddefinition_p.h \
     coroutinestoredfunctioncall_p.h

@@ -1,7 +1,9 @@
 #ifndef INCLUDE_COROUTINE_H
 #define INCLUDE_COROUTINE_H
 
-class Coroutine
+#include "coroutine_global.h"
+
+class COROUTINE_EXPORT Coroutine
 {
 public:
     enum Status
