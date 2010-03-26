@@ -3,7 +3,7 @@
 ** Copyright (C) 2010 Nokia Corporation and/or its subsidiary(-ies).
 ** Contact: Nokia Corporation (qt-info@nokia.com)
 **
-** This file is part of the Qt Toolkit.
+** This file is part of the Coroutine library.
 **
 ****************************************************************************/
 
