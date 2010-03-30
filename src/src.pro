@@ -5,6 +5,7 @@ unix: CONFIG += hide_symbols
 
 DESTDIR = ../lib
 TARGET = coroutine
+include(adjusttarget.pri)
 
 HEADERS += \
     coroutine.h \
