@@ -55,3 +55,12 @@ win32:contains(QMAKE_CXX,cl) {
         backend/switchstack_msvc_32.cpp \
         backend/initializestack_32.cpp
 }
+
+# install rules
+target.path = $$PREFIX/lib
+
+headers.files = $$HEADERS
+headers.path = $$PREFIX/include/coroutine
+
+INSTALLS += target headers
+
