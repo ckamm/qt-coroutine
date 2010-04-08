@@ -3,7 +3,6 @@ CONFIG += dll
 DEFINES += COROUTINE_LIBRARY
 unix: CONFIG += hide_symbols
 
-DESTDIR = ../lib
 TARGET = coroutine
 include(adjusttarget.pri)
 
@@ -23,7 +22,7 @@ contains(QMAKE_CXX,g++) {
     win32 {
         # will fail for 64 bit win!
         SOURCES += \
-            backend/switchstack_gcc_32_win.cpp \
+            backend/switchstack_gcc_32_win.s \
             backend/initializestack_32.cpp
     }
 

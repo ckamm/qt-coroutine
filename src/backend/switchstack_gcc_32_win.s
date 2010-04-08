@@ -27,11 +27,11 @@
 ##
 ##########################################################################
 
-.global _switchStackInternal
-.section .text 
-.def _switchStackInternal ; .scl 2 ; .type 32 ; .endef 
+.global __switchStackInternal
+.section .text
+.def __switchStackInternal ; .scl 2 ; .type 32 ; .endef
 
-_switchStackInternal:
+__switchStackInternal:
     // save callee-saved registers
     push %ebp
     movl %esp, %ebp
