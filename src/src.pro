@@ -24,9 +24,7 @@ contains(QMAKE_CXX,g++) {
         SOURCES += \
             backend/switchstack_gcc_32_win.s \
             backend/initializestack_32.cpp
-    }
-
-    mac {
+    } else: mac {
         CONFIG(x86_64) {
             SOURCES += \
                 backend/switchstack_gcc_64_linux_mac.s \
@@ -36,17 +34,20 @@ contains(QMAKE_CXX,g++) {
                 backend/switchstack_gcc_32_linux_mac.s \
                 backend/initializestack_32.cpp
         }
-    }
-    !win32:!mac {
-        contains(QMAKE_CFLAGS,-m64) {
+    } else: unix {
+        contains(QMAKE_HOST.arch, x86_64) {
             SOURCES += \
                 backend/switchstack_gcc_64_linux_mac.s \
                 backend/initializestack_64_linux_mac.cpp
-        } else {
+        } else:contains(QMAKE_HOST.arch, x86) {
             SOURCES += \
                 backend/switchstack_gcc_32_linux_mac.s \
                 backend/initializestack_32.cpp
+        } else {
+            error(Unsupported platform)
         }
+    } else {
+        error(Unsupported platform)
     }
 }
 win32:contains(QMAKE_CXX,cl) {
