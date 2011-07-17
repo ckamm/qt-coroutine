@@ -1,0 +1,24 @@
+Warnings
+
+Thread-local data
+
+Libraries that use thread-local data and were not designed with
+coroutines in mind may not be safe to use from multiple coroutines at
+the same time.
+
+For example, having several coroutines executing JavaScript and allowing
+them to yield during script evaluation is not a good idea. At least not 
+with JavaScriptCore.
+
+
+Microsoft Windows
+
+Using a heap based stack is not supported on Windows. The exception 
+handler and some functions like OutputDebugString that use SEH will
+notice that the stack is not where it should be and terminate the 
+application.
+
+When using coroutine you need to either avoid using anything SEH 
+related from coroutines or implement a backend using Microsoft's Fiber
+API.
+
